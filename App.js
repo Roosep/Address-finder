@@ -1,11 +1,23 @@
-import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, Button} from 'react-native';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View, TextInput, Button, Alert} from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
+import * as Location from 'expo-location';
 
 export default function App() {
   const [address, setAddress] = useState("");
-  const [location, setLocation] = useState({ latitude: 0, longitude: 0 });
+  const [location, setLocation] = useState({latitude: 0, longitude: 0});
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert("No permission to get location")
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation({latitude: location.coords.latitude, longitude: location.coords.longitude});
+    })();
+  }, []);
 
   const fetchAddress = () => {
     fetch("http://www.mapquestapi.com/geocoding/v1/address?key=Th641oY1JqBxhPmRAjeQ5Kj2jCtEntWA&inFormat=kvp&outFormat=json&location="+address)
